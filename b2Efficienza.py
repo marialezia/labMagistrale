@@ -13,7 +13,7 @@ efficienza = int3/int2
 effErr= np.sqrt(efficienza*(1-efficienza)/int3)
 
 #faccio grafico
-plt.plot(tensione, efficienza, 'o-')
+plt.errorbar(tensione, efficienza, yerr = effErr,  fmt = '-o')
 plt.grid()
 plt.xlabel('tensione [mV]')
 plt.ylabel('efficienza')
