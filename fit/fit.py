@@ -4,10 +4,10 @@ import pandas as pd
 from scipy import optimize
 from scipy import special
 
-#importo dati da file csv
-b2EffDf = pd.read_csv('b2Efficienza.csv')
 
+#definisco funzioni
 def efficienza(df):
+    ''' prende dati da file csv: int2 e int3 e calcolola l'efficienza e l'errore sull'efficienza '''
     tensione = np.array(df['tensione'])
     int2 = np.array(df['intersezione2'])
     int3 = np.array(df['intersezione3'])
@@ -15,24 +15,33 @@ def efficienza(df):
     effErr= np.sqrt(eff*(1-eff)/int3)
     return tensione, eff, effErr
 
-def errorFunction(x, mu, sigma):
+def errorFunction(x, mu, sigma, norm):
     x2 = (x-mu)/(np.sqrt(2)*sigma)
-    return (1 + special.erf(x2))/2
+    return norm*(1 + special.erf(x2))/2
 
+
+#importo dati da file csv
+b2EffDf = pd.read_csv('b2Efficienza.csv')
 tens2, eff2, effErr2 = efficienza(b2EffDf)
+
+#definisco parametri ottimali (li abbiamo visti dal grafico e messi a caso)
 mu = 1350
 sigma = 65
-erF = errorFunction(tens2, mu, sigma)
-pstart = np.array([mu, sigma])
-params, params_covariance = optimize.curve_fit(errorFunction, tens2, eff2, p0=[pstart])
-print(params, params_covariance)
-#plt.plot(tens2, errorFunction(eff2, 1))
-#plt.plot(tens2, special.erf(tens2))
-plt.plot(tens2, erF)
-#plt.plot(tens2, errorFunction(tens2))
-#plt.plot(tens2, special.erf(tens2))
-plt.xlabel('$x$')
+norm = eff2[np.argmax(eff2)]
+pstart = np.array([mu, sigma, norm])
 
-plt.ylabel('$erf(x)$')
+#faccio il fit e trovo parametri ottimali
+parametri, cov = optimize.curve_fit(errorFunction, tens2, eff2, p0=[pstart])
 
+#ricalcolo valori con parametri ottimali
+errFuncFit = errorFunction(tens2, parametri[0], parametri[1], parametri[2])
+
+#faccio grafico fit e dati originali
+plt.errorbar(tens2, eff2, yerr = effErr2,  fmt = '-o', color = 'rebeccapurple', label = 'dati originali', alpha = 0.8)
+plt.plot(tens2, errFuncFit, color = 'green', alpha = 0.8, label = 'fit')
+plt.grid()
+plt.title('Fit vs dati originali')
+plt.xlabel('tensione [mV]')
+plt.ylabel('efficienza')
+plt.legend()
 plt.show()
