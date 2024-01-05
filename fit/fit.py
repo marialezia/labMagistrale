@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import optimize
 from scipy import special
+import sys, os
 
 
 #definisco funzioni
@@ -32,6 +33,8 @@ pstart = np.array([mu, sigma, norm])
 
 #faccio il fit e trovo parametri ottimali
 parametri, cov = optimize.curve_fit(errorFunction, tens2, eff2, p0=[pstart])
+errParametri = np.sqrt(np.diag(cov))
+print('parametri ottimali trovati: \n', 'mu: ', parametri[0],' ± ', errParametri[0], '\n sigma: ', parametri[1],' ± ', errParametri[1], '\n normalizzazione: ',parametri[2],' ± ', errParametri[2])
 
 #ricalcolo valori con parametri ottimali
 errFuncFit = errorFunction(tens2, parametri[0], parametri[1], parametri[2])
@@ -45,3 +48,12 @@ plt.xlabel('tensione [mV]')
 plt.ylabel('efficienza')
 plt.legend()
 plt.show()
+
+#salvoParametri su file
+d = {'parametri': parametri, 'errori': errParametri}
+
+tabella = pd.DataFrame(data=d, index=['mu', 'sigma', 'normalizzazione'])
+print(tabella)
+
+currentDirectory = os.getcwd()
+tabella.to_csv(currentDirectory+'/parametriFit')
