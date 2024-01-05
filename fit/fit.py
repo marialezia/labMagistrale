@@ -56,4 +56,4 @@ tabella = pd.DataFrame(data=d, index=['mu', 'sigma', 'normalizzazione'])
 print(tabella)
 
 currentDirectory = os.getcwd()
-tabella.to_csv(currentDirectory+'/parametriFit')
+tabella.to_csv(currentDirectory+'/parametriFit.csv')
